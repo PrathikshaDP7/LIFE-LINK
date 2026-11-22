@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LIFE-LINK Dashboard</title>
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>🚑 LIFE-LINK</h1>
+        <p>AI-Powered Smart Ambulance Positioning System</p>
+    </header>
+
+    <main>
+
+        <h2>Emergency Response Dashboard</h2>
+        <p class="subtitle">
+            Intelligent monitoring for faster emergency response
+        </p>
+
+        <section class="stats">
+
+            <div class="card">
+                <h3>Total Ambulances</h3>
+                <p>25</p>
+            </div>
+
+            <div class="card">
+                <h3>Available Ambulances</h3>
+                <p>18</p>
+            </div>
+
+            <div class="card">
+                <h3>Active Emergencies</h3>
+                <p>04</p>
+            </div>
+
+            <div class="card">
+                <h3>High Risk Zones</h3>
+                <p>06</p>
+            </div>
+
+        </section>
+
+        <section class="panel">
+            <h2>Accident Risk Monitoring</h2>
+            
+
+            <div class="risk">
+                <span>Silk Board</span>
+                <strong class="high">HIGH RISK</strong>
+            </div>
+
+            <div class="risk">
+                <span>Electronic City</span>
+                <strong class="medium">MEDIUM RISK</strong>
+            </div>
+
+            <div class="risk">
+                <span>Hebbal</span>
+                <strong class="high">HIGH RISK</strong>
+            </div>
+
+        </section>
+        <section class="panel">
+            <h2>Live Accident Hotspot Map</h2>
+            <p>Monitor accident-prone locations in Bengaluru</p>
+            <div id="map"></div>
+        </section>
+
+        <section class="panel">
+            <h2>Ambulance Management</h2>
+
+            <table>
+                <tr>
+                    <th>Ambulance ID</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                </tr>
+
+                <tr>
+                    <td>AMB001</td>
+                    <td>Silk Board</td>
+                    <td class="available">Available</td>
+                </tr>
+
+                <tr>
+                    <td>AMB002</td>
+                    <td>Hebbal</td>
+                    <td class="busy">Busy</td>
+                </tr>
+
+                <tr>
+                    <td>AMB003</td>
+                    <td>Electronic City</td>
+                    <td class="available">Available</td>
+                </tr>
+            </table>
+
+        </section>
+
+    </main>
+
+    <footer>
+        LIFE-LINK © 2026 | Saving Lives Through Intelligence
+    </footer>
+
+<!-- Leaflet JavaScript library -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- LIFE-LINK JavaScript -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
