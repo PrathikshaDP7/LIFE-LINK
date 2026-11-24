@@ -52,36 +52,16 @@
 
         </section>
 
-        <section class="panel">
-            <h2>Accident Risk Monitoring</h2>
-            
-
-            <div class="risk">
-                <span>Silk Board</span>
-                <strong class="high">HIGH RISK</strong>
-            </div>
-
-            <div class="risk">
-                <span>Electronic City</span>
-                <strong class="medium">MEDIUM RISK</strong>
-            </div>
-
-            <div class="risk">
-                <span>Hebbal</span>
-                <strong class="high">HIGH RISK</strong>
-            </div>
-
-        </section>
-        <section class="panel">
-            <h2>Live Accident Hotspot Map</h2>
-
+        
 <!-- Nearest Ambulance Finder -->
 
 <section class="panel">
     <h2>🚑 Find Nearest Ambulance</h2>
+
     <p>Enter the accident location coordinates</p>
 
     <div class="ambulance-search">
+
         <input
             type="number"
             id="accidentLat"
@@ -101,47 +81,34 @@
         <button id="findAmbulanceBtn">
             Find Nearest Ambulance
         </button>
+
     </div>
 
     <div id="ambulanceResult">
         Results will appear here.
     </div>
+
 </section>
 
-            <p>Monitor accident-prone locations in Bengaluru</p>
-            <div id="map"></div>
-        </section>
 
-        <section class="panel">
-            <h2>Ambulance Management</h2>
+<!-- Accident Hotspot Map -->
 
-            <table>
-                <tr>
-                    <th>Ambulance ID</th>
-                    <th>Location</th>
-                    <th>Status</th>
-                </tr>
+<section class="panel">
 
-                <tr>
-                    <td>AMB001</td>
-                    <td>Silk Board</td>
-                    <td class="available">Available</td>
-                </tr>
+    <h2>Live Accident Hotspot Map</h2>
 
-                <tr>
-                    <td>AMB002</td>
-                    <td>Hebbal</td>
-                    <td class="busy">Busy</td>
-                </tr>
+    <p>Monitor accident-prone locations in Bengaluru</p>
 
-                <tr>
-                    <td>AMB003</td>
-                    <td>Electronic City</td>
-                    <td class="available">Available</td>
-                </tr>
-            </table>
+    <div id="map"></div>
 
-        </section>
+    <p>
+        <span style="color:red;">●</span> Accident Location
+        &nbsp;&nbsp;
+        <span style="color:blue;">●</span> Nearest Ambulance
+    </p>
+
+</section>
+
 
     </main>
 

@@ -1,11 +1,14 @@
 
-// Initialize Bengaluru map
+// ========================================
+// 1. INITIALIZE BENGALURU MAP
+// ========================================
 
 const map = L.map('map').setView(
     [12.9716, 77.5946], 11
 );
 
-// Load OpenStreetMap tiles
+
+// OpenStreetMap tiles
 
 L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -15,7 +18,14 @@ L.tileLayer(
 ).addTo(map);
 
 
-// Accident risk locations (demonstration data)
+// Layer for ambulance search markers and route
+
+const ambulanceLayer = L.layerGroup().addTo(map);
+
+
+// ========================================
+// 2. ACCIDENT HOTSPOT LOCATIONS
+// ========================================
 
 const locations = [
     {
@@ -39,7 +49,7 @@ const locations = [
 ];
 
 
-// Display accident hotspot markers
+// Display hotspot markers
 
 locations.forEach(location => {
 
@@ -57,53 +67,178 @@ locations.forEach(location => {
         }
     )
     .addTo(map)
-    .bindPopup(
-        `<b>${location.name}</b><br>
-         Accident Risk: ${location.risk}`
-    );
+    .bindPopup(`
+        <b>${location.name}</b><br>
+        Accident Risk: ${location.risk}
+    `);
 
 });
 
-// Nearest Ambulance Finder
+
+// ========================================
+// 3. FIND NEAREST AMBULANCE
+// ========================================
 
 document.getElementById("findAmbulanceBtn")
 .addEventListener("click", async function () {
 
-    const lat = document.getElementById("accidentLat").value;
-    const lng = document.getElementById("accidentLng").value;
+    const lat = parseFloat(
+        document.getElementById("accidentLat").value
+    );
+
+    const lng = parseFloat(
+        document.getElementById("accidentLng").value
+    );
 
     const result = document.getElementById("ambulanceResult");
 
-    if (lat === "" || lng === "") {
-        result.innerHTML = "Please enter both coordinates.";
+    // Validate coordinates
+
+    if (
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lng) ||
+        lat < -90 || lat > 90 ||
+        lng < -180 || lng > 180
+    ) {
+        result.innerHTML = "Please enter valid coordinates.";
         return;
     }
 
     result.innerHTML = "Searching for nearest ambulance...";
 
     try {
+
         const response = await fetch(
             `/find_ambulance?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`
         );
 
         const data = await response.json();
 
-        if (data.error || data.message === "No available ambulances found") {
-            result.innerHTML = data.error || data.message;
+        if (!response.ok || data.error) {
+            result.textContent = data.error || "Unable to find ambulance.";
+            return;
+        }
+
+        if (!data.ambulance) {
+            result.textContent = data.message;
+            ambulanceLayer.clearLayers();
             return;
         }
 
         const ambulance = data.ambulance;
 
+        // Clear previous search markers and route
+
+        ambulanceLayer.clearLayers();
+
+
+        // ========================================
+        // 4. ACCIDENT LOCATION MARKER
+        // ========================================
+
+        const accidentMarker = L.circleMarker(
+            [lat, lng],
+            {
+                radius: 11,
+                color: "red",
+                fillColor: "red",
+                fillOpacity: 1,
+                weight: 3
+            }
+        )
+        .addTo(ambulanceLayer)
+        .bindPopup("<b>Accident Location</b>");
+
+        
+        // ========================================
+        // 5. NEAREST AMBULANCE MARKER
+        // ========================================
+
+        const ambulanceMarker = L.circleMarker(
+            [ambulance.lat, ambulance.lng],
+            {
+                radius: 11,
+                color: "blue",
+                fillColor: "#2563eb",
+                fillOpacity: 1,
+                weight: 3
+            }
+        )
+        .addTo(ambulanceLayer)
+        .bindPopup(`
+            <b>Nearest Ambulance</b><br>
+            ID: ${ambulance.id}<br>
+            Status: ${ambulance.status}<br>
+            Distance: ${ambulance.distance} km
+        `);
+
+
+        // ========================================
+        // 6. CONNECT BOTH LOCATIONS
+        // ========================================
+
+        const route = L.polyline(
+            [
+                [lat, lng],
+                [ambulance.lat, ambulance.lng]
+            ],
+            {
+                color: "blue",
+                weight: 4,
+                dashArray: "8, 8"
+            }
+        ).addTo(ambulanceLayer);
+
+
+        // ========================================
+        // 7. AUTO ZOOM MAP
+        // ========================================
+
+        const bounds = L.latLngBounds([
+            [lat, lng],
+            [ambulance.lat, ambulance.lng]
+        ]);
+
+        map.fitBounds(bounds, {
+            padding: [60, 60],
+            maxZoom: 14
+        });
+
+
+        // ========================================
+        // 8. DISPLAY RESULTS
+        // ========================================
+
         result.innerHTML = `
-            <h3>Nearest Ambulance Found!</h3>
-            <p>Ambulance ID: ${ambulance.id}</p>
-            <p>Status: ${ambulance.status}</p>
-            <p>Distance: ${ambulance.distance} km</p>
+            <h3>🚑 Nearest Ambulance Found!</h3>
+
+            <p><b>Ambulance ID:</b> ${ambulance.id}</p>
+
+            <p><b>Status:</b> ${ambulance.status}</p>
+
+            <p><b>Distance:</b> ${ambulance.distance} km</p>
+
+            <p><b>Accident Location:</b>
+            ${lat.toFixed(4)}, ${lng.toFixed(4)}</p>
+
+            <p><b>Ambulance Location:</b>
+            ${ambulance.lat}, ${ambulance.lng}</p>
+
+            <p style="color:green;">
+            <b>Ambulance location displayed on map!</b>
+            </p>
+
+            <small>
+            Distance is calculated in a straight line.
+            </small>
         `;
 
     } catch (error) {
-        result.innerHTML = "Unable to find ambulance. Please try again.";
+
+        result.textContent =
+            "Unable to find ambulance. Please try again.";
+
         console.error(error);
     }
+
 });

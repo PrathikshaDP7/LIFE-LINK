@@ -33,15 +33,18 @@ ambulances = [
 ]
 
 
-# Calculate distance using Haversine formula
+# Correct Haversine distance calculation
 def calculate_distance(lat1, lon1, lat2, lon2):
 
-    R = 6371  # Earth's radius in kilometres
+    R = 6371
 
     lat1 = radians(lat1)
+    lon1 = radians(lon1)
     lat2 = radians(lat2)
-    dlat = radians(lat2 - lat1)
-    dlon = radians(lon2 - lon1)
+    lon2 = radians(lon2)
+
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
 
     a = (
         sin(dlat / 2) ** 2
@@ -64,8 +67,19 @@ def find_ambulance():
     try:
         accident_lat = float(request.args.get("lat"))
         accident_lng = float(request.args.get("lng"))
+
     except (TypeError, ValueError):
-        return jsonify({"error": "Please provide valid latitude and longitude"}), 400
+        return jsonify({
+            "error": "Please enter valid coordinates."
+        }), 400
+
+    # Validate Bengaluru-compatible geographic coordinate ranges
+    if not (-90 <= accident_lat <= 90 and
+            -180 <= accident_lng <= 180):
+
+        return jsonify({
+            "error": "Coordinates are outside valid latitude/longitude ranges."
+        }), 400
 
     available_ambulances = []
 
@@ -86,7 +100,9 @@ def find_ambulance():
             })
 
     if not available_ambulances:
-        return jsonify({"message": "No available ambulances found"})
+        return jsonify({
+            "message": "No available ambulances found."
+        })
 
     nearest = min(
         available_ambulances,
@@ -94,7 +110,11 @@ def find_ambulance():
     )
 
     return jsonify({
-        "message": "Nearest ambulance found",
+        "message": "Nearest ambulance found.",
+        "accident": {
+            "lat": accident_lat,
+            "lng": accident_lng
+        },
         "ambulance": nearest
     })
 
