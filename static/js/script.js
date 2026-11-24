@@ -63,3 +63,47 @@ locations.forEach(location => {
     );
 
 });
+
+// Nearest Ambulance Finder
+
+document.getElementById("findAmbulanceBtn")
+.addEventListener("click", async function () {
+
+    const lat = document.getElementById("accidentLat").value;
+    const lng = document.getElementById("accidentLng").value;
+
+    const result = document.getElementById("ambulanceResult");
+
+    if (lat === "" || lng === "") {
+        result.innerHTML = "Please enter both coordinates.";
+        return;
+    }
+
+    result.innerHTML = "Searching for nearest ambulance...";
+
+    try {
+        const response = await fetch(
+            `/find_ambulance?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`
+        );
+
+        const data = await response.json();
+
+        if (data.error || data.message === "No available ambulances found") {
+            result.innerHTML = data.error || data.message;
+            return;
+        }
+
+        const ambulance = data.ambulance;
+
+        result.innerHTML = `
+            <h3>Nearest Ambulance Found!</h3>
+            <p>Ambulance ID: ${ambulance.id}</p>
+            <p>Status: ${ambulance.status}</p>
+            <p>Distance: ${ambulance.distance} km</p>
+        `;
+
+    } catch (error) {
+        result.innerHTML = "Unable to find ambulance. Please try again.";
+        console.error(error);
+    }
+});

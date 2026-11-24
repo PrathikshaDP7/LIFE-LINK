@@ -74,6 +74,40 @@
         </section>
         <section class="panel">
             <h2>Live Accident Hotspot Map</h2>
+
+<!-- Nearest Ambulance Finder -->
+
+<section class="panel">
+    <h2>🚑 Find Nearest Ambulance</h2>
+    <p>Enter the accident location coordinates</p>
+
+    <div class="ambulance-search">
+        <input
+            type="number"
+            id="accidentLat"
+            placeholder="Latitude"
+            step="any"
+            value="12.9716"
+        >
+
+        <input
+            type="number"
+            id="accidentLng"
+            placeholder="Longitude"
+            step="any"
+            value="77.5946"
+        >
+
+        <button id="findAmbulanceBtn">
+            Find Nearest Ambulance
+        </button>
+    </div>
+
+    <div id="ambulanceResult">
+        Results will appear here.
+    </div>
+</section>
+
             <p>Monitor accident-prone locations in Bengaluru</p>
             <div id="map"></div>
         </section>
