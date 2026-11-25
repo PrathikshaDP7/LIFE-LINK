@@ -177,17 +177,44 @@ document.getElementById("findAmbulanceBtn")
         // 6. CONNECT BOTH LOCATIONS
         // ========================================
 
-        const route = L.polyline(
-            [
-                [lat, lng],
-                [ambulance.lat, ambulance.lng]
-            ],
-            {
-                color: "blue",
-                weight: 4,
-                dashArray: "8, 8"
-            }
-        ).addTo(ambulanceLayer);
+      // ========================================
+// 6. GET ACTUAL ROAD ROUTE USING OSRM
+// ========================================
+
+const osrmURL =
+    `https://router.project-osrm.org/route/v1/driving/` +
+    `${ambulance.lng},${ambulance.lat};${lng},${lat}` +
+    `?overview=full&geometries=geojson`;
+
+console.log("Requesting road route:", osrmURL);
+
+const routeResponse = await fetch(osrmURL);
+const routeData = await routeResponse.json();
+
+console.log("OSRM response:", routeData);
+
+if (
+    !routeResponse.ok ||
+    routeData.code !== "Ok" ||
+    !routeData.routes ||
+    routeData.routes.length === 0
+) {
+    throw new Error("OSRM could not find a road route.");
+}
+
+const roadRoute = routeData.routes[0];
+
+// Convert OSRM [longitude, latitude] to Leaflet [latitude, longitude]
+const roadCoordinates = roadRoute.geometry.coordinates.map(
+    coordinate => [coordinate[1], coordinate[0]]
+);
+
+// Draw the road route
+const route = L.polyline(roadCoordinates, {
+    color: "#2563eb",
+    weight: 6,
+    opacity: 0.85
+}).addTo(ambulanceLayer);
 
 
         // ========================================
@@ -208,30 +235,36 @@ document.getElementById("findAmbulanceBtn")
         // ========================================
         // 8. DISPLAY RESULTS
         // ========================================
-
+        const roadDistance = (roadRoute.distance / 1000).toFixed(2);
+        const estimatedTime = Math.ceil(roadRoute.duration / 60);
         result.innerHTML = `
-            <h3>🚑 Nearest Ambulance Found!</h3>
+    <h3>🚑 Nearest Ambulance Found!</h3>
 
-            <p><b>Ambulance ID:</b> ${ambulance.id}</p>
+    <p><b>Ambulance ID:</b> ${ambulance.id}</p>
 
-            <p><b>Status:</b> ${ambulance.status}</p>
+    <p><b>Status:</b> ${ambulance.status}</p>
 
-            <p><b>Distance:</b> ${ambulance.distance} km</p>
+    <p><b>Straight-line Distance:</b> ${ambulance.distance} km</p>
 
-            <p><b>Accident Location:</b>
-            ${lat.toFixed(4)}, ${lng.toFixed(4)}</p>
+    <p><b>Road Distance:</b> ${roadDistance} km</p>
 
-            <p><b>Ambulance Location:</b>
-            ${ambulance.lat}, ${ambulance.lng}</p>
+    <p><b>Estimated Travel Time:</b> ${estimatedTime} minutes</p>
 
-            <p style="color:green;">
-            <b>Ambulance location displayed on map!</b>
-            </p>
+    <p><b>Accident Location:</b>
+    ${lat.toFixed(4)}, ${lng.toFixed(4)}</p>
 
-            <small>
-            Distance is calculated in a straight line.
-            </small>
-        `;
+    <p><b>Ambulance Location:</b>
+    ${ambulance.lat}, ${ambulance.lng}</p>
+
+    <p style="color:green;">
+    <b>Road route displayed on map!</b>
+    </p>
+
+    <small>
+    Travel time is an OSRM estimate, not live traffic information.
+    </small>
+`;
+        ;
 
     } catch (error) {
 
